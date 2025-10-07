@@ -1,13 +1,15 @@
-[English](https://github.com/KiteMC/VerifyMC/releases/tag/v1.2.2) | 简体中文 | [官方文档](https://kitemc.com/docs/verifymc/)
+[English](https://github.com/KiteMC/VerifyMC/releases/tag/v1.2.3) | 简体中文 | [官方文档](https://kitemc.com/docs/verifymc/)
 
-# VerifyMC v1.2.2 更新日志
+# VerifyMC v1.2.3 更新日志
 
-## 多语言支持架构重构
-- 完全重构国际化系统，支持无限语言扩展
-- 在 config.yml 中可设置任意语言代码
-- 自动为新语言创建配置文件(基于英文模板)
+## 🔧 Folia 兼容性修复
 
-## 命令提示优化
-- `/vmc reload` 命令现在会显示灰色提示信息，说明该命令仅能重载部分配置
-- 重载相关消息(启动中、成功、失败)改为英文硬编码，提升跨语言一致性
-- 主题切换提示改为英文硬编码，确保所有用户都能理解关键操作提示
+### 修复的问题
+
+- **玩家踢出崩溃**：修复 `IllegalStateException: Player is already removed from player chunk loader` 错误
+- **插件启动失败**：修复 `UnsupportedOperationException` 错误，插件现在可在 Folia 上正常启动
+
+### 解决方案
+
+- 使用 `PlayerLoginEvent` 在登录阶段拦截玩家，避免区块加载冲突
+- 自动检测 Folia 环境，禁用不兼容的异步任务（whitelist.json 监控、版本提醒）

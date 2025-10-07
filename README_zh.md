@@ -32,12 +32,15 @@
 ## 🖼️ 截图预览（Glassx 主题）
 
 ### 首页
+
 ![首页 Glassx](docs/zh/screenshot-home-glassx.png)
 
 ### 注册页
+
 ![注册页 Glassx](docs/zh/screenshot-register-glassx.png)
 
 ### 管理后台
+
 ![后台 Glassx](docs/zh/screenshot-admin-glassx.png)
 
 > 想看 Default 主题？[点此查看 Default 主题截图](./README_default_zh.md)
@@ -46,7 +49,7 @@
 
 ## 🛠️ 技术栈
 
-- Java（Bukkit/Spigot/Paper 插件）
+- Java（Bukkit/Spigot/Paper/Folia 插件）
 - 前端：Vue3 + Tailwind CSS（支持自定义主题）
 - WebSocket 实时通信
 - 邮件服务：SMTP
@@ -54,6 +57,7 @@
 ---
 
 ## 📊 Bstats
+
 ![Bstats](https://bstats.org/signatures/bukkit/verifymc.svg)
 
 ---
@@ -210,4 +214,5 @@ authme:
   # 密码正则表达式
   password_regex: "^[a-zA-Z0-9_]{3,16}$" 
 ```
-> ❤️ 如果你喜欢本项目，欢迎 Star、分享与反馈！ 
+
+> ❤️ 如果你喜欢本项目，欢迎 Star、分享与反馈！

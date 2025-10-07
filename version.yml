@@ -1,16 +1,18 @@
 release: true
-version: 1.2.2
+version: 1.2.3
 release_notes: |
-  [简体中文](https://github.com/KiteMC/VerifyMC/blob/v1.2.2/release_notes_zh.md) | English | [Official Documentation](https://kitemc.com/docs/verifymc/)
+  [简体中文](https://github.com/KiteMC/VerifyMC/blob/v1.2.3/release_notes_zh.md) | English | [Official Documentation](https://kitemc.com/docs/verifymc/)
   
-  ## What's New in v1.2.2
+  # VerifyMC v1.2.3 Release Notes
   
-  ### Multilingual Support Architecture Refactored
-  - Completely refactored internationalization system with unlimited language support
-  - Set any language code in config.yml
-  - Auto-creates language files based on English template
+  ## 🔧 Folia Compatibility Fixed
   
-  ### Command Prompt Improvements
-  - `/vmc reload` command now displays a gray hint message explaining it can only reload partial configurations
-  - Reload-related messages (starting, success, failed) are now hardcoded in English for cross-language consistency
-  - Theme switching prompt is now hardcoded in English to ensure all users understand critical operation hints
+  ### Fixed Issues
+  
+  - **Player Kick Crashes**: Fixed `IllegalStateException: Player is already removed from player chunk loader` error
+  - **Plugin Startup Failures**: Fixed `UnsupportedOperationException` error, plugin now starts properly on Folia
+  
+  ### Solutions
+  
+  - Use `PlayerLoginEvent` to intercept players during login phase, avoiding chunk loader conflicts
+  - Auto-detect Folia environment and disable incompatible async tasks (whitelist.json monitoring, version reminders)

@@ -26,7 +26,9 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import org.bukkit.event.Listener;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerLoginEvent.Result;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
 import java.nio.file.Files;
@@ -55,9 +57,26 @@ public class VerifyMC extends JavaPlugin implements Listener {
     private Path whitelistJsonPath;
     private long lastWhitelistJsonModified = 0;
     public boolean debug = false;
+    private Boolean isFoliaServer = null;
 
     public void debugLog(String msg) {
         if (debug) getLogger().info("[DEBUG] " + msg);
+    }
+    
+    /**
+     * Check if server is running Folia
+     * @return true if Folia is detected
+     */
+    private boolean isFoliaServer() {
+        if (isFoliaServer == null) {
+            try {
+                Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
+                isFoliaServer = true;
+            } catch (ClassNotFoundException e) {
+                isFoliaServer = false;
+            }
+        }
+        return isFoliaServer;
     }
 
     private String getConfigLanguage() {
@@ -164,16 +183,27 @@ public class VerifyMC extends JavaPlugin implements Listener {
         } else if (!"bukkit".equalsIgnoreCase(whitelistMode) && autoCleanup) {
             cleanupServerWhitelist();
         }
-        if ("plugin".equalsIgnoreCase(whitelistMode)) {
-            getServer().getPluginManager().registerEvents(this, this);
-        } else if ("bukkit".equalsIgnoreCase(whitelistMode) && whitelistJsonSync) {
-            startWhitelistJsonWatcher();
+        // Always register event listener for player login interception
+        getServer().getPluginManager().registerEvents(this, this);
+        
+        // Only start whitelist.json watcher in bukkit mode
+        if ("bukkit".equalsIgnoreCase(whitelistMode) && whitelistJsonSync) {
+            // Folia doesn't support async repeating tasks, disable whitelist.json watcher on Folia
+            if (!isFoliaServer()) {
+                startWhitelistJsonWatcher();
+            } else {
+                getLogger().info("§e[VerifyMC] Whitelist.json auto-sync disabled on Folia (use manual /vmc reload instead)");
+            }
         }
         // Compatibility detection and hints
         String serverName = getServer().getName().toLowerCase();
         getLogger().info(getMessage("server.cores_supported"));
-        if (serverName.contains("folia")) {
+        if (isFoliaServer()) {
             getLogger().info(getMessage("server.detected.folia"));
+            getLogger().info("§e[VerifyMC] Folia compatibility mode enabled:");
+            getLogger().info("§e  - Player kick uses delayed scheduling");
+            getLogger().info("§e  - Whitelist.json auto-sync disabled (use /vmc reload to manually sync)");
+            getLogger().info("§e  - Version update reminders disabled");
         } else if (serverName.contains("purpur")) {
             getLogger().info(getMessage("server.detected.purpur"));
         } else if (serverName.contains("paper")) {
@@ -490,24 +520,37 @@ public class VerifyMC extends JavaPlugin implements Listener {
     }
 
     /**
-     * Intercept unregistered players in plugin mode
-     * @param event Player join event
+     * Intercept unregistered players using PlayerLoginEvent
+     * This is called BEFORE the player joins, avoiding chunk loader conflicts
+     * Works in both 'plugin' and 'bukkit' modes for consistent protection
+     * @param event Player login event
      */
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        if (!"plugin".equalsIgnoreCase(whitelistMode)) return;
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerLogin(PlayerLoginEvent event) {
         Player player = event.getPlayer();
-        String ip = player.getAddress() != null ? player.getAddress().getAddress().getHostAddress() : "";
+        String ip = event.getAddress() != null ? event.getAddress().getHostAddress() : "";
         java.util.List<String> bypassIps = getConfig().getStringList("whitelist_bypass_ips");
-        if (bypassIps.contains(ip)) return; // Skip verification
-        // Check player name (id)
+        if (bypassIps.contains(ip)) {
+            debugLog("Bypassed whitelist check for IP: " + ip);
+            return; // Skip verification for whitelisted IPs
+        }
+        
+        // Check player name (id) in plugin database
         Map<String, Object> user = userDao != null ? userDao.getAllUsers().stream()
             .filter(u -> player.getName().equalsIgnoreCase((String)u.get("username")) && "approved".equals(u.get("status")))
             .findFirst().orElse(null) : null;
+        
         if (user == null) {
+            // Player is not in approved list
             String url = webRegisterUrl;
             String msg = "§c[ VerifyMC ]\n§7Please visit §a" + url + " §7to register";
-            player.kickPlayer(msg);
+            
+            // Disallow login directly - no need for delayed scheduling
+            // This works on all server types including Folia
+            event.disallow(Result.KICK_WHITELIST, msg);
+            debugLog("Blocked unregistered player: " + player.getName() + " from IP: " + ip);
+        } else {
+            debugLog("Allowed registered player: " + player.getName() + " (Status: approved)");
         }
     }
 
@@ -714,23 +757,25 @@ public class VerifyMC extends JavaPlugin implements Listener {
                 getLogger().info("§e[VerifyMC] " + getMessage("version.latest_version") + ": " + result.getLatestVersion());
                 getLogger().info("§e[VerifyMC] " + getMessage("version.download_url") + ": " + versionCheckService.getReleasesUrl());
                 
-                // Schedule periodic reminders (every 30 minutes)
-                new BukkitRunnable() {
-                    private int reminderCount = 0;
-                    private final int maxReminders = 3; // Maximum 3 reminders per session
-                    
-                    @Override
-                    public void run() {
-                        if (reminderCount >= maxReminders) {
-                            this.cancel();
-                            return;
-                        }
+                // Schedule periodic reminders (every 30 minutes) - Folia doesn't support async repeating tasks
+                if (!isFoliaServer()) {
+                    new BukkitRunnable() {
+                        private int reminderCount = 0;
+                        private final int maxReminders = 3; // Maximum 3 reminders per session
                         
-                        reminderCount++;
-                        getLogger().info("§e[VerifyMC] " + getMessage("version.update_reminder") + " (" + reminderCount + "/" + maxReminders + ")");
-                        getLogger().info("§e[VerifyMC] " + getMessage("version.download_url") + ": " + versionCheckService.getReleasesUrl());
-                    }
-                }.runTaskTimerAsynchronously(this, 36000L, 36000L); // 30 minutes = 36000 ticks
+                        @Override
+                        public void run() {
+                            if (reminderCount >= maxReminders) {
+                                this.cancel();
+                                return;
+                            }
+                            
+                            reminderCount++;
+                            getLogger().info("§e[VerifyMC] " + getMessage("version.update_reminder") + " (" + reminderCount + "/" + maxReminders + ")");
+                            getLogger().info("§e[VerifyMC] " + getMessage("version.download_url") + ": " + versionCheckService.getReleasesUrl());
+                        }
+                    }.runTaskTimerAsynchronously(this, 36000L, 36000L); // 30 minutes = 36000 ticks
+                }
                 
             } else if (result.isSuccess()) {
                 debugLog("Version check completed. Plugin is up to date.");

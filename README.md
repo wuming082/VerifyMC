@@ -32,12 +32,15 @@
 ## 🖼️ Screenshots (Glassx Theme)
 
 ### Home Page
+
 ![Home Glassx](docs/screenshot-home-glassx.png)
 
 ### Registration Page
+
 ![Registration Glassx](docs/screenshot-register-glassx.png)
 
 ### Admin Panel
+
 ![Admin Glassx](docs/screenshot-admin-glassx.png)
 
 > Want to see Default theme? [Click here for Default theme screenshots.](./README_default.md)
@@ -46,7 +49,7 @@
 
 ## 🛠️ Tech Stack
 
-- Java (Bukkit/Spigot/Paper plugin)
+- Java (Bukkit/Spigot/Paper/Folia plugin)
 - Frontend: Vue3 + Tailwind CSS (custom themes supported)
 - WebSocket real-time communication
 - Email service: SMTP
@@ -205,4 +208,5 @@ authme:
   # Password regex pattern
   password_regex: "^[a-zA-Z0-9_]{3,16}$" 
 ```
+
 > ❤️ If you like this project, please Star, share, and give us feedback!
