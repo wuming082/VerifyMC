@@ -29,6 +29,7 @@
     "register": "注册",
     "login": "登录",
     "admin": "管理",
+    "server_status": "服务器状态",
     "logout": "退出登录"
   },
   "home": {
@@ -231,6 +232,23 @@
       "rejected": "很抱歉，您的申请被拒绝"
     },
     "reason": "拒绝原因"
+  },
+  "server_status": {
+    "title": "服务器状态",
+    "subtitle": "实时查看服务器运行信息",
+    "players": {
+      "title": "在线玩家",
+      "subtitle": "当前服务器在线玩家数量"
+    },
+    "plugins": {
+      "title": "已加载插件",
+      "subtitle": "服务器当前运行的插件数量"
+    },
+    "uptime": {
+      "title": "运行时间",
+      "subtitle": "服务器已运行的时间"
+    },
+    "refresh": "刷新状态"
   },
   "errors": {
     "404": {

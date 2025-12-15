@@ -73,7 +73,7 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
-import { Home, UserPlus, LogIn, Settings } from 'lucide-vue-next'
+import { Home, UserPlus, LogIn, Settings, Activity } from 'lucide-vue-next'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -102,6 +102,13 @@ const menuItems = computed(() => [
     href: '/login',
     gradient: 'radial-gradient(circle, rgba(34,197,94,0.15) 0%, rgba(22,163,74,0.06) 50%, rgba(21,128,61,0) 100%)',
     iconColor: 'text-green-500',
+  },
+  {
+    icon: Activity,
+    label: t('nav.server_status'),
+    href: '/server-status',
+    gradient: 'radial-gradient(circle, rgba(147,51,234,0.15) 0%, rgba(124,58,237,0.06) 50%, rgba(109,40,217,0) 100%)',
+    iconColor: 'text-purple-500',
   },
   {
     icon: Settings,

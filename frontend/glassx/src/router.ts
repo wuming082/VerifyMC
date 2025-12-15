@@ -33,6 +33,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: "user_status.title", requiresAuth: true },
   },
   {
+    path: "/server-status",
+    name: "ServerStatus",
+    component: () => import("./pages/ServerStatus.vue"),
+    meta: { title: "server_status.title" },
+  },
+  {
     path: "/404",
     name: "NotFound",
     component: () => import("./pages/NotFound.vue"),

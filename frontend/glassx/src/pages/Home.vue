@@ -1,7 +1,7 @@
 <template>
   <div class="home-page">
     <!-- Hero Section -->
-    <HeroGeometric 
+    <HeroGeometric
       v-if="serverName !== undefined"
       :title1="$t('home.welcome')"
       :title2="serverName"

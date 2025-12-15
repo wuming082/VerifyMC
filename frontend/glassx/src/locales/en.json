@@ -29,6 +29,7 @@
     "register": "Register",
     "login": "Login",
     "admin": "Admin",
+    "server_status": "Server Status",
     "logout": "Logout"
   },
   "home": {
@@ -242,6 +243,23 @@
       "rejected": "Sorry, your application has been rejected"
     },
     "reason": "Rejection Reason"
+  },
+  "server_status": {
+    "title": "Server Status",
+    "subtitle": "View real-time server information",
+    "players": {
+      "title": "Online Players",
+      "subtitle": "Current number of online players"
+    },
+    "plugins": {
+      "title": "Loaded Plugins",
+      "subtitle": "Number of plugins currently running"
+    },
+    "uptime": {
+      "title": "Uptime",
+      "subtitle": "Server running time"
+    },
+    "refresh": "Refresh Status"
   },
   "errors": {
     "404": {
